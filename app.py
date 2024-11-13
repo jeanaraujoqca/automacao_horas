@@ -42,7 +42,7 @@ def costumize_page():
             color: #ffffff !important;  /* Texto em branco */
         }
 
-        p {
+        #root > div:nth-child(1) > div.withScreencast > div > div > section > div.stMainBlockContainer.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(4) > div > label > div > p {
             color: #000000
         }
 
