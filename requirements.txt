@@ -4,3 +4,4 @@ msal
 streamlit
 openpyxl
 utils
+xlsxwriter
