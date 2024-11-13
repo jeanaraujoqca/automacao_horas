@@ -210,6 +210,6 @@ if uploaded_file:
                     )
             except Exception as e:
                 mostrar_erro_personalizado(
-                    f"Erro ao processar linha {index}: {str(e)}",
+                    f"Erro ao processar para {email}: {str(e)}",
                     "Verifique o conteúdo e formato do arquivo."
                 )
