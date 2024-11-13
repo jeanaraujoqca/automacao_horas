@@ -15,7 +15,7 @@ tenant_id = os.getenv('TENANT_ID')
 cert_password = os.getenv('CERT_PASSWORD').encode()  # Converta a senha em bytes
 thumbprint = os.getenv('THUMBPRINT')
 
-certificado_base64 = os.getenv("CERT_BASE64")
+certificado_base64 = os.getenv('CERT_BASE64')
 
 certificado_pem = base64.b64decode(certificado_base64)
 
