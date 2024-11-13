@@ -151,6 +151,7 @@ def enviar_email(relatorio, nome, equipe, total_sucesso, total_erro):
 nome = st.text_input("Nome")
 equipe = st.text_input("Equipe")
 email_usuario = st.text_input("E-mail Corporativo")
+st.write(f"E-mail capturado: {email_usuario}")
 
 # Obter e validar o token
 access_token = obter_token()
