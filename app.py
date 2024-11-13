@@ -37,9 +37,9 @@ thumbprint = os.getenv('THUMBPRINT')
 if not thumbprint:
     missing_vars.append("THUMBPRINT")
 
-cert_content = os.getenv("CERTIFICADO_PEM")
+cert_base64 = os.getenv("CERTIFICADO_BASE64")
 if not cert_content:
-    missing_vars.append("CERTIFICADO_PEM")
+    missing_vars.append("CERTIFICADO_BASE64")
 
 # Verifique se há variáveis de ambiente ausentes e exiba um erro para cada uma
 if missing_vars:
