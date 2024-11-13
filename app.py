@@ -20,7 +20,7 @@ def costumize_page():
     st.markdown(
         """
         <style>
-        /* Força o fundo a cobrir toda a área da página */
+        /* Fundo da página */
         html, body, .stApp {
             background-image: url("https://raw.githubusercontent.com/jeanaraujoqca/automacao_horas/refs/heads/main/bg_dark.png");
             background-size: cover;
@@ -31,33 +31,25 @@ def costumize_page():
             padding: 0;
         }
 
-        /* Adiciona transparência ao cabeçalho e remove a borda */
+        /* Transparência no cabeçalho */
         header, .css-18e3th9, .css-1d391kg, [data-testid="stHeader"] {
             background-color: rgba(0, 0, 0, 0) !important;
-            color: #ffffff; /* Texto branco para contraste */
-            }
-        
-        /* Cor dos títulos e subtítulos */
-        h1 {
-            color: #A10D22 !important;
-            font-size: 32px;
+            color: #ffffff !important; /* Texto branco */
         }
 
-        #root > div:nth-child(1) > div.withScreencast > div > div > section > div.stMainBlockContainer.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(4) > div > label > div > p {
-            color: #A10D22 !important;
+        /* Estilo dos títulos e subtítulos em branco */
+        h1, h2, h3, h4, h5, h6, p, label {
+            color: #ffffff !important;  /* Texto em branco */
         }
 
-        /* Cor da caixa de upload */
+        /* Caixa de upload de arquivo em branco */
         .stFileUploader {
-            background-color: #1B263B !important;  /* Cor de fundo */
-            color: #ffffff !important;              /* Cor do texto dentro da caixa */
+            background-color: #ffffff !important;  /* Fundo branco */
+            border: 2px solid #ffffff !important;   /* Borda branca */
+            color: #000000 !important;              /* Texto preto para contraste dentro da caixa */
+            border-radius: 10px;                    /* Bordas arredondadas */
             padding: 10px;
         }
-
-        #root > div:nth-child(1) > div.withScreencast > div > div > section > div.stMainBlockContainer.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(4) > div > section.st-emotion-cache-1gulkj5 e1b2p2ww15 {
-            color: #A10D22
-        }
-        
         </style>
         """,
         unsafe_allow_html=True
