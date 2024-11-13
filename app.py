@@ -7,35 +7,33 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 import os
 import tempfile
-import base64
-from utils import bg_page
 
+def bg_page():
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-image: url("https://raw.githubusercontent.com/jeanaraujoqca/automacao_horas/refs/heads/main/bg_dark.png");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Chama a função para aplicar o fundo
+bg_page()
+
+# Configuração da página e conteúdo
 st.set_page_config(
     page_title="Home",
     page_icon='qca_logo_2.png',
     layout="wide",
 )
-bg_page()
-hide_menu = """
-<style>
-#MainMenu {
-    visibility:visible;
-}
 
-footer {
-    visibility:visible;
-}
-
-footer:before {
-    content:'Desenvolvido pelo Núcleo de Operações - Controladoria Jurídica';
-    display:block;
-    position:relative;
-    color:#6c6a76;
-}
-</style>
-"""
-
-# Inicialize Streamlit
+# Conteúdo da página
 st.title("Automação de Lançamento de Horas de Treinamento no SharePoint")
 
 # Carregar as variáveis de ambiente
