@@ -24,7 +24,7 @@ background-attachment: fixed;
 '''
 
 # Inicialize Streamlit
-st.markdown(page_pg_img, unsafe_allow_html=True)
+st.markdown(page_bg_img, unsafe_allow_html=True)
 st.title("Upload e Envio de Dados para SharePoint")
 
 # Carregar as variáveis de ambiente
