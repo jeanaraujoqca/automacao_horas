@@ -42,7 +42,7 @@ if uploaded_file:
         app = msal.ConfidentialClientApplication(client_id, authority=authority,
                                                  client_credential={
                                                     "private_key": private_key,
-                                                    "thumbprint": thumbprint
+                                                    "thumbprint": "D77E3395F9E653DC66A7DEAAC707B5D40615E3B0"
                                                  })
         token_response = app.acquire_token_for_client(scopes=scope)
         
