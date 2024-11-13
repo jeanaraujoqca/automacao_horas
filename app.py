@@ -61,6 +61,8 @@ def customize_page():
 
 customize_page()
 
+st.title("Automação de Lançamento de Horas de Treinamento")
+
 # Carregar as variáveis de ambiente
 client_id = os.getenv('CLIENT_ID')
 tenant_id = os.getenv('TENANT_ID')
