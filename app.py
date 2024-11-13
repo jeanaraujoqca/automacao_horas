@@ -6,6 +6,7 @@ from datetime import datetime
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 import os
+import base64
 
 # Configurações do cliente (de preferência, carregue essas variáveis de ambiente)
 client_id = os.getenv('CLIENT_ID')
