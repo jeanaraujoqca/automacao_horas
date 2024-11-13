@@ -40,20 +40,22 @@ def costumize_page():
         /* Cor dos títulos e subtítulos */
         h1 {
             color: #A10D22 !important;
-            font-size: 38px;
+            font-size: 32px;
         }
 
-        p:has-text("Escolha o arquivo Excel") {
+        #root > div:nth-child(1) > div.withScreencast > div > div > section > div.stMainBlockContainer.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(4) > div > label > div > p {
             color: #A10D22 !important;
         }
 
         /* Cor da caixa de upload */
         .stFileUploader {
             background-color: #1B263B !important;  /* Cor de fundo */
-            border: 2px solid #A10D22 !important;   /* Cor da borda vinho */
             color: #ffffff !important;              /* Cor do texto dentro da caixa */
-            border-radius: 10px;                    /* Bordas arredondadas */
             padding: 10px;
+        }
+
+        #root > div:nth-child(1) > div.withScreencast > div > div > section > div.stMainBlockContainer.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(4) > div > section {
+            color: #A10D22
         }
         
         </style>
