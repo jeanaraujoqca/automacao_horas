@@ -30,19 +30,33 @@ def bg_page():
             padding: 0;
             overflow: hidden;
         }
-
-        /* Define transparência no cabeçalho e barra lateral para mostrar o fundo */
-        .css-18e3th9, .css-1d391kg {  /* Seletores comuns para o cabeçalho e barra lateral */
-            background-color: rgba(0, 0, 0, 0) !important;
-        }
-        
         </style>
         """,
         unsafe_allow_html=True
     )
 
+hide_menu = """
+<style>
+#MainMenu {
+    visibility:visible;
+}
+
+footer {
+    visibility:visible;
+}
+
+footer:before {
+    content:'Desenvolvido pela Eficiência Jurídica - Controladoria Jurídica';
+    display:block;
+    position:relative;
+    color:#6c6a76;
+}
+</style>
+"""
+
 # Aplicar o fundo da página
 bg_page()
+st.markdown(hide_menu, unsafe_allow_html=True)
 
 # Conteúdo da página
 st.title("Automação de Lançamento de Horas de Treinamento no SharePoint")
