@@ -18,9 +18,34 @@ cert_password = os.getenv('CERT_PASSWORD', '').encode()  # Converta a senha em b
 thumbprint = os.getenv('THUMBPRINT')
 cert_content = os.getenv("CERTIFICADO_PEM")
 
-if not all([client_id, tenant_id, cert_password, thumbprint, cert_content]):
-    st.error("Erro: Verifique se todas as variáveis de ambiente estão configuradas.")
-    st.stop()
+missing_vars = []
+
+client_id = os.getenv('CLIENT_ID')
+if not client_id:
+    missing_vars.append("CLIENT_ID")
+
+tenant_id = os.getenv('TENANT_ID')
+if not tenant_id:
+    missing_vars.append("TENANT_ID")
+
+cert_password = os.getenv('CERT_PASSWORD')
+if not cert_password:
+    missing_vars.append("CERT_PASSWORD")
+
+thumbprint = os.getenv('THUMBPRINT')
+if not thumbprint:
+    missing_vars.append("THUMBPRINT")
+
+cert_content = os.getenv("CERTIFICADO_PEM")
+if not cert_content:
+    missing_vars.append("CERTIFICADO_PEM")
+
+# Verifique se há variáveis de ambiente ausentes e exiba um erro para cada uma
+if missing_vars:
+    st.error("Erro: As seguintes variáveis de ambiente estão ausentes:")
+    for var in missing_vars:
+        st.error(f"- {var}")
+    st.stop()  # Interrompe a execução se houver variáveis de ambiente ausentes
 
 # Criar arquivo temporário para o certificado
 with tempfile.NamedTemporaryFile(delete=False, suffix=".pem") as temp_cert_file:
