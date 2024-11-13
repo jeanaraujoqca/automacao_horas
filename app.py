@@ -40,7 +40,7 @@ def costumize_page():
         /* Estilo dos títulos e subtítulos em branco */
         h1 {
             color: #ffffff !important;  /* Texto em branco */
-            font-size: 32px;
+            font-size: 28px;
         }
 
         #root > div:nth-child(1) > div.withScreencast > div > div > section > div.stMainBlockContainer.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(4) > div > label > div > p {
