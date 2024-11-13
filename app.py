@@ -14,7 +14,7 @@ url_background = "https://raw.githubusercontent.com/jeanaraujoqca/automacao_hora
 # Definir o estilo CSS para a imagem de fundo
 page_bg_img = f'''
 <style>
-.stApp {{
+html, body, .stApp {{
 background-image: url("{url_background}");
 background-size: cover;
 background-repeat: no-repeat;
