@@ -42,6 +42,10 @@ def costumize_page():
             color: #ffffff !important;  /* Texto em branco */
         }
 
+        p {
+            color: #000000
+        }
+
         /* Caixa de upload de arquivo em branco */
         .stFileUploader {
             background-color: #ffffff !important;  /* Fundo branco */
