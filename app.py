@@ -109,6 +109,14 @@ if uploaded_file:
     df = pd.read_excel(uploaded_file)
     st.write("Pré-visualização dos dados:", df.head())
 
+    # Verificar colunas necessárias
+    required_columns = ['EMAIL', 'UNIDADE', 'TREINAMENTO', 'CARGA HORARIA', 'TIPO DO TREINAMENTO', 'INICIO DO TREINAMENTO', 'TERMINO DO TREINAMENTO', 'CATEGORIA', 'INSTITUIÇÃO/INSTRUTOR']
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    
+    if missing_columns:
+        st.error(f"Erro: As seguintes colunas estão ausentes no arquivo: {', '.join(missing_columns)}")
+        st.stop()
+
     if st.button("Enviar para SharePoint"):
         st.write("Aguarde, estamos lançando os treinamentos...")
 
@@ -183,7 +191,6 @@ if uploaded_file:
         output = BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             df_resultados.to_excel(writer, index=False, sheet_name='Resultados')
-            writer.save()
         output.seek(0)
 
         # Exibir botão para download do relatório
