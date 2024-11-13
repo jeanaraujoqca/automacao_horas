@@ -7,6 +7,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 import os
 import tempfile
+import base64
 
 # Inicialize Streamlit
 st.title("Upload e Envio de Dados para SharePoint")
@@ -16,7 +17,7 @@ client_id = os.getenv('CLIENT_ID')
 tenant_id = os.getenv('TENANT_ID')
 cert_password = os.getenv('CERT_PASSWORD', '').encode()  # Converta a senha em bytes
 thumbprint = os.getenv('THUMBPRINT')
-cert_content = os.getenv("CERTIFICADO_PEM")
+cert_base64 = os.getenv("CERTIFICADO_BASE64")
 
 missing_vars = []
 
@@ -47,18 +48,21 @@ if missing_vars:
         st.error(f"- {var}")
     st.stop()  # Interrompe a execução se houver variáveis de ambiente ausentes
 
-# Criar arquivo temporário para o certificado
+cert_pem = base64.b64decode(cert_base64)
+
+# Salve o certificado temporariamente
 with tempfile.NamedTemporaryFile(delete=False, suffix=".pem") as temp_cert_file:
-    temp_cert_file.write(cert_content.encode())
-    temp_cert_path = temp_cert_file.name  # Salva o caminho do arquivo temporário
+    temp_cert_file.write(cert_pem)
+    temp_cert_path = temp_cert_file.name
 
 # Função para obter token de autenticação
 def obter_token():
     try:
+        # Carregue a chave privada do certificado temporário
         with open(temp_cert_path, 'rb') as pem_file:
             private_key = serialization.load_pem_private_key(
                 pem_file.read(),
-                password=cert_password,
+                password=None,  # Coloque a senha se o PEM estiver protegido
                 backend=default_backend()
             )
 
