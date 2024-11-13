@@ -54,7 +54,7 @@ def costumize_page():
             padding: 10px;
         }
 
-        #root > div:nth-child(1) > div.withScreencast > div > div > section > div.stMainBlockContainer.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(4) > div > section {
+        #root > div:nth-child(1) > div.withScreencast > div > div > section > div.stMainBlockContainer.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(4) > div > section.st-emotion-cache-1gulkj5 e1b2p2ww15 {
             color: #A10D22
         }
         
