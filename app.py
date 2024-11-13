@@ -21,10 +21,10 @@ def bg_page():
         """
         <style>
         /* Aplica o fundo ao HTML e BODY para cobrir toda a página */
-        .stApp {{
+        .stApp {
             background-image: url("https://raw.githubusercontent.com/jeanaraujoqca/automacao_horas/refs/heads/main/bg_dark.png");
             background-size: cover;
-        }}
+        }
         </style>
         """,
         unsafe_allow_html=True
