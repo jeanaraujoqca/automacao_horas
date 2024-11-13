@@ -2,7 +2,7 @@ import base64
 import streamlit as st
 
 
-def bg_page(image_file):
+def bg_page():
     st.markdown(
     """
     <style>
