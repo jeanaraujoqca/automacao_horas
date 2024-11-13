@@ -11,7 +11,7 @@ import base64
 
 # Configuração da página deve ser a primeira linha de Streamlit
 st.set_page_config(
-    page_title="Home",
+    page_title="Automação de Horas",
     page_icon='qca_logo_2.png',
     layout="wide",
 )
@@ -20,12 +20,22 @@ def bg_page():
     st.markdown(
         """
         <style>
-        .stApp {
+        /* Aplica o fundo ao HTML e BODY para cobrir toda a página */
+        html, body, .stApp {
             background-image: url("https://raw.githubusercontent.com/jeanaraujoqca/automacao_horas/refs/heads/main/bg_dark.png");
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
+
+        /* Define transparência no cabeçalho e barra lateral para mostrar o fundo */
+        .css-18e3th9, .css-1d391kg {  /* Seletores comuns para o cabeçalho e barra lateral */
+            background-color: rgba(0, 0, 0, 0) !important;
+        }
+        
         </style>
         """,
         unsafe_allow_html=True
