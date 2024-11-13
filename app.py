@@ -96,15 +96,6 @@ def obter_token():
         st.error(f"Erro ao obter token de autenticação: {str(e)}")
         st.stop()
 
-def obter_author_id(email, headers):
-    user_url = f"https://queirozcavalcanti.sharepoint.com/sites/qca360/_api/web/siteusers/getbyemail('{email}')"
-    response = requests.get(user_url, headers=headers)
-    if response.status_code == 200:
-        author_id = response.json()['d']['Id']
-        return author_id
-    else:
-        raise ValueError(f"Não foi possível obter o ID para o e-mail {email}. Verifique se o e-mail está correto.")
-
 # Função para enviar e-mail
 def enviar_email(relatorio, nome, equipe, total_sucesso, total_erro):
     remetente = email_jean  # Substitua pelo seu e-mail
@@ -177,8 +168,15 @@ if uploaded_file and nome and equipe:
         st.stop()
 
     if st.button("Enviar para SharePoint"):
-        # obter author_id
-        obter_author_id(email_usuario, headers)
+        # Obter Id do Autor 
+        user_url = f"https://queirozcavalcanti.sharepoint.com/sites/qca360/_api/web/siteusers/getbyemail('{email_usuario}')"
+        response = requests.get(user_url, headers=headers)
+        
+        if response.status_code == 200:
+            author_id = response.json()['d']['Id']
+        else:
+            raise ValueError(f"Erro ao buscar o usuário para o email {email_usuario}: {response.status_code}")
+        
         st.write("Aguarde, estamos lançando os treinamentos...")
 
         # Lista para armazenar o status de cada treinamento
