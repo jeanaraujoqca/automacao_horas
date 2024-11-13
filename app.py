@@ -38,8 +38,9 @@ def costumize_page():
         }
 
         /* Estilo dos títulos e subtítulos em branco */
-        h1, h2, h3, h4, h5, h6, label {
+        h1 {
             color: #ffffff !important;  /* Texto em branco */
+            font-size: 32px;
         }
 
         #root > div:nth-child(1) > div.withScreencast > div > div > section > div.stMainBlockContainer.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(4) > div > label > div > p {
