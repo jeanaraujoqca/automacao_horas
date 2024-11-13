@@ -9,6 +9,11 @@ import os
 import tempfile
 import base64
 from io import BytesIO
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 # Configuração da página deve ser a primeira linha de Streamlit
 st.set_page_config(
@@ -31,25 +36,22 @@ def customize_page():
             margin: 0;
             padding: 0;
         }
-
         /* Transparência no cabeçalho */
         header, .css-18e3th9, .css-1d391kg, [data-testid="stHeader"] {
             background-color: rgba(0, 0, 0, 0) !important;
-            color: #ffffff !important; /* Texto branco */
+            color: #ffffff !important;
         }
-
         /* Estilo dos títulos e subtítulos em branco */
         h1 {
-            color: #ffffff !important;  /* Texto em branco */
+            color: #ffffff !important;
             font-size: 28px;
         }
-
         /* Caixa de upload de arquivo em branco */
         .stFileUploader {
-            background-color: #ffffff !important;  /* Fundo branco */
-            border: 2px solid #ffffff !important;   /* Borda branca */
-            color: #000000 !important;              /* Texto preto para contraste dentro da caixa */
-            border-radius: 10px;                    /* Bordas arredondadas */
+            background-color: #ffffff !important;
+            border: 2px solid #ffffff !important;
+            color: #000000 !important;
+            border-radius: 10px;
             padding: 10px;
         }
         </style>
@@ -57,11 +59,7 @@ def customize_page():
         unsafe_allow_html=True
     )
 
-# Aplicar o fundo da página
 customize_page()
-
-# Título da página
-st.title("Automação de Lançamento de Horas de Treinamento no SharePoint")
 
 # Carregar as variáveis de ambiente
 client_id = os.getenv('CLIENT_ID')
@@ -69,6 +67,9 @@ tenant_id = os.getenv('TENANT_ID')
 cert_password = os.getenv('CERT_PASSWORD', '').encode()
 thumbprint = os.getenv('THUMBPRINT')
 cert_base64 = os.getenv("CERTIFICADO_BASE64")
+email_jean = os.getenv("EMAIL_JEAN")
+email_dani = os.getenv("EMAIL_DANI")
+senha_email = os.getenv("SENHA_EMAIL")
 
 # Função para obter token de autenticação
 def obter_token():
@@ -95,6 +96,62 @@ def obter_token():
         st.error(f"Erro ao obter token de autenticação: {str(e)}")
         st.stop()
 
+def obter_author_id(email, headers):
+    user_url = f"https://queirozcavalcanti.sharepoint.com/sites/qca360/_api/web/siteusers/getbyemail('{email}')"
+    response = requests.get(user_url, headers=headers)
+    if response.status_code == 200:
+        author_id = response.json()['d']['Id']
+        return author_id
+    else:
+        raise ValueError(f"Não foi possível obter o ID para o e-mail {email}. Verifique se o e-mail está correto.")
+
+# Função para enviar e-mail
+def enviar_email(relatorio, nome, equipe, total_sucesso, total_erro):
+    remetente = email_jean  # Substitua pelo seu e-mail
+    destinatario = email_dani  # Substitua pelo e-mail destinatário
+    senha = senha_email  # Substitua pela senha do e-mail
+
+    # Configuração do e-mail
+    mensagem = MIMEMultipart()
+    mensagem["From"] = remetente
+    mensagem["To"] = destinatario
+    mensagem["Subject"] = "Relatório de Utilização - Automação de Horas"
+
+    # Corpo do e-mail
+    corpo = f"""
+    Segue o relatório sobre a utilização do sistema de lançamento de treinamentos.
+
+    Usuário: {nome}
+    Equipe: {equipe}
+    Total de Treinamentos Lançados com Sucesso: {total_sucesso}
+    Total de Treinamentos com Erro: {total_erro}
+
+    Em anexo, relatório detalhado.
+    """
+    mensagem.attach(MIMEText(corpo, "plain"))
+
+    # Anexar o relatório
+    part = MIMEBase("application", "octet-stream")
+    part.set_payload(relatorio.getvalue())
+    encoders.encode_base64(part)
+    part.add_header("Content-Disposition", "attachment; filename=relatorio_resultados.xlsx")
+    mensagem.attach(part)
+
+    # Envio do e-mail
+    try:
+        with smtplib.SMTP("smtp-mail.outlook.com", 587) as servidor:
+            servidor.starttls()
+            servidor.login(remetente, senha)
+            servidor.sendmail(remetente, destinatario, mensagem.as_string())
+        st.success("E-mail enviado com sucesso!")
+    except Exception as e:
+        st.error(f"Erro ao enviar o e-mail: {str(e)}")
+
+# Campos de entrada para nome e equipe
+nome = st.text_input("Nome")
+equipe = st.text_input("Equipe")
+email_usuario = st.text_input("E-mail Corporativo")
+
 # Obter e validar o token
 access_token = obter_token()
 headers = {
@@ -105,9 +162,13 @@ headers = {
 
 # Upload do arquivo Excel
 uploaded_file = st.file_uploader("Escolha o arquivo Excel", type="xlsx")
-if uploaded_file:
+if uploaded_file and nome and equipe:
     df = pd.read_excel(uploaded_file)
     st.write("Pré-visualização dos dados:", df.head())
+
+    # obter author_id
+
+    obter_author_id(email_usuario, headers)
 
     # Verificar colunas necessárias
     required_columns = ['EMAIL', 'UNIDADE', 'TREINAMENTO', 'CARGA HORARIA', 'TIPO DO TREINAMENTO', 'INICIO DO TREINAMENTO', 'TERMINO DO TREINAMENTO', 'CATEGORIA', 'INSTITUIÇÃO/INSTRUTOR']
@@ -122,6 +183,8 @@ if uploaded_file:
 
         # Lista para armazenar o status de cada treinamento
         resultados = []
+        total_sucesso = 0
+        total_erro = 0
 
         for index, row in df.iterrows():
             try:
@@ -156,33 +219,22 @@ if uploaded_file:
                     "TIPO_": categoria,
                     "INSTITUI_x00c7__x00c3_O_x002f_IN": instituicao_instrutor,
                     "UNIDADE": unidade,
-                    "E_x002d_MAILId": correct_user_id
+                    "E_x002d_MAILId": correct_user_id,
+                    "AuthorId": author_id
                 }
 
                 add_item_url = f"https://queirozcavalcanti.sharepoint.com/sites/qca360/_api/web/lists/getbytitle('Treinamento de atividades')/items"
                 response = requests.post(add_item_url, headers=headers, json=item_data)
 
                 if response.status_code == 201:
-                    resultados.append({
-                        "Email": email,
-                        "Treinamento": treinamento,
-                        "Status": "Sucesso",
-                        "Mensagem": "Item adicionado com sucesso"
-                    })
+                    resultados.append({"Email": email, "Treinamento": treinamento, "Status": "Sucesso", "Mensagem": "Item adicionado com sucesso"})
+                    total_sucesso += 1
                 else:
-                    resultados.append({
-                        "Email": email,
-                        "Treinamento": treinamento,
-                        "Status": "Erro",
-                        "Mensagem": f"Erro ao adicionar item: {response.status_code}"
-                    })
+                    resultados.append({"Email": email, "Treinamento": treinamento, "Status": "Erro", "Mensagem": f"Erro ao adicionar item: {response.status_code}"})
+                    total_erro += 1
             except Exception as e:
-                resultados.append({
-                    "Email": email,
-                    "Treinamento": treinamento,
-                    "Status": "Erro",
-                    "Mensagem": str(e)
-                })
+                resultados.append({"Email": email, "Treinamento": treinamento, "Status": "Erro", "Mensagem": str(e)})
+                total_erro += 1
 
         # Gerar o relatório em um DataFrame
         df_resultados = pd.DataFrame(resultados)
@@ -192,6 +244,9 @@ if uploaded_file:
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             df_resultados.to_excel(writer, index=False, sheet_name='Resultados')
         output.seek(0)
+
+        # Enviar e-mail com o relatório
+        enviar_email(output, nome, equipe, total_sucesso, total_erro)
 
         # Exibir botão para download do relatório
         st.success("Processamento concluído! Baixe o relatório abaixo.")
