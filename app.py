@@ -11,8 +11,12 @@ import os
 client_id = os.getenv('CLIENT_ID')
 client_secret = os.getenv('CLIENT_SECRET')
 tenant_id = os.getenv('TENANT_ID')
-cert_path = 'caminho/para/seu/certificado.pem'  # Atualize o caminho do certificado
 cert_password = os.getenv('CERT_PASSWORD').encode()  # Converta a senha em bytes
+thumbprint = os.getenv('THUMBPRINT')
+
+certificado_base64 = os.getenv("CERT_BASE64")
+
+certificado_pem = base64.b64decode(certificado_base64)
 
 # Inicialize Streamlit
 st.title("Upload e Envio de Dados para SharePoint")
@@ -25,12 +29,11 @@ if uploaded_file:
 
     if st.button("Enviar para SharePoint"):
         # Carregar chave privada do certificado
-        with open(cert_path, 'rb') as pem_file:
-            private_key = serialization.load_pem_private_key(
-                pem_file.read(),
-                password=None,
-                backend=default_backend()
-            )
+        private_key = serialization.load_pem_private_key(
+        certificado_pem,
+        password=None, 
+        backend=default_backend()
+        )
 
         # Obter token de autenticação
         authority = f'https://login.microsoftonline.com/{tenant_id}'
@@ -38,7 +41,7 @@ if uploaded_file:
         app = msal.ConfidentialClientApplication(client_id, authority=authority,
                                                  client_credential={
                                                     "private_key": private_key,
-                                                    "thumbprint": "seu_thumbprint"
+                                                    "thumbprint": thumbprint
                                                  })
         token_response = app.acquire_token_for_client(scopes=scope)
         
@@ -100,3 +103,6 @@ if uploaded_file:
                     st.error(f"Erro ao adicionar item para {email}: {response.status_code}")
             except Exception as e:
                 st.error(f"Erro ao processar linha {index}: {str(e)}")
+
+
+                
