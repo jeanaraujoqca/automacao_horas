@@ -9,7 +9,22 @@ import os
 import tempfile
 import base64
 
+url_background = "https://raw.githubusercontent.com/jeanaraujoqca/automacao_horas/refs/heads/main/bg_dark.png"
+
+# Definir o estilo CSS para a imagem de fundo
+page_bg_img = f'''
+<style>
+.stApp {{
+background-image: url("{url_da_imagem}");
+background-size: cover;
+background-repeat: no-repeat;
+background-attachment: fixed;
+}}
+</style>
+'''
+
 # Inicialize Streamlit
+st.markdown(page_pg_img, unsafe_allow_html=True)
 st.title("Upload e Envio de Dados para SharePoint")
 
 # Carregar as variáveis de ambiente
