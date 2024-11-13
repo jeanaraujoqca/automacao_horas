@@ -16,7 +16,7 @@ st.set_page_config(
     layout="wide",
 )
 
-def costumize_page():
+def customize_page():
     st.markdown(
         """
         <style>
@@ -43,10 +43,6 @@ def costumize_page():
             font-size: 28px;
         }
 
-        #root > div:nth-child(1) > div.withScreencast > div > div > section > div.stMainBlockContainer.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(4) > div > label > div > p {
-            color: #000000
-        }
-
         /* Caixa de upload de arquivo em branco */
         .stFileUploader {
             background-color: #ffffff !important;  /* Fundo branco */
@@ -61,55 +57,46 @@ def costumize_page():
     )
 
 # Aplicar o fundo da página
-costumize_page()
+customize_page()
 
-# Conteúdo da página
+# Título da página
 st.title("Automação de Lançamento de Horas de Treinamento no SharePoint")
 
+# Função para exibir mensagens de erro amigáveis
+def mostrar_erro_personalizado(mensagem, sugestao=None):
+    st.error(f"🚨 {mensagem}")
+    if sugestao:
+        st.info(f"💡 {sugestao}")
+
 # Carregar as variáveis de ambiente
-client_id = os.getenv('CLIENT_ID')
-tenant_id = os.getenv('TENANT_ID')
-cert_password = os.getenv('CERT_PASSWORD', '').encode()  # Converta a senha em bytes
-thumbprint = os.getenv('THUMBPRINT')
-cert_base64 = os.getenv("CERTIFICADO_BASE64")
-
-missing_vars = []
-
-client_id = os.getenv('CLIENT_ID')
-if not client_id:
-    missing_vars.append("CLIENT_ID")
-
-tenant_id = os.getenv('TENANT_ID')
-if not tenant_id:
-    missing_vars.append("TENANT_ID")
-
-cert_password = os.getenv('CERT_PASSWORD')
-if not cert_password:
-    missing_vars.append("CERT_PASSWORD")
-
-thumbprint = os.getenv('THUMBPRINT')
-if not thumbprint:
-    missing_vars.append("THUMBPRINT")
-
-cert_base64 = os.getenv("CERTIFICADO_BASE64")
-if not cert_base64:
-    missing_vars.append("CERTIFICADO_BASE64")
+variaveis = {
+    "CLIENT_ID": os.getenv('CLIENT_ID'),
+    "TENANT_ID": os.getenv('TENANT_ID'),
+    "CERT_PASSWORD": os.getenv('CERT_PASSWORD', '').encode(),  # Converta a senha em bytes
+    "THUMBPRINT": os.getenv('THUMBPRINT'),
+    "CERTIFICADO_BASE64": os.getenv("CERTIFICADO_BASE64")
+}
 
 # Verifique se há variáveis de ambiente ausentes e exiba um erro para cada uma
+missing_vars = [var for var, value in variaveis.items() if not value]
+
 if missing_vars:
-    st.error("Erro: As seguintes variáveis de ambiente estão ausentes:")
+    mostrar_erro_personalizado(
+        "Algumas variáveis de ambiente estão ausentes e são necessárias para a execução.",
+        "Verifique as configurações e certifique-se de que todas as variáveis de ambiente estão corretamente configuradas."
+    )
     for var in missing_vars:
-        st.error(f"- {var}")
+        st.write(f"- **{var}** está ausente")
     st.stop()  # Interrompe a execução se houver variáveis de ambiente ausentes
 
-cert_pem = base64.b64decode(cert_base64)
+cert_pem = base64.b64decode(variaveis["CERTIFICADO_BASE64"])
 
 # Salve o certificado temporariamente
 with tempfile.NamedTemporaryFile(delete=False, suffix=".pem") as temp_cert_file:
     temp_cert_file.write(cert_pem)
     temp_cert_path = temp_cert_file.name
 
-# Função para obter token de autenticação
+# Função para obter token de autenticação com tratamento de erro
 def obter_token():
     try:
         # Carregue a chave privada do certificado temporário
@@ -121,41 +108,56 @@ def obter_token():
             )
 
         # Configuração MSAL
-        authority = f'https://login.microsoftonline.com/{tenant_id}'
+        authority = f'https://login.microsoftonline.com/{variaveis["TENANT_ID"]}'
         scope = ['https://queirozcavalcanti.sharepoint.com/.default']
-        app = msal.ConfidentialClientApplication(client_id, authority=authority,
-                                                 client_credential={
-                                                    "private_key": private_key,
-                                                    "thumbprint": thumbprint
-                                                 })
+        app = msal.ConfidentialClientApplication(
+            variaveis["CLIENT_ID"], authority=authority,
+            client_credential={
+                "private_key": private_key,
+                "thumbprint": variaveis["THUMBPRINT"]
+            }
+        )
         token_response = app.acquire_token_for_client(scopes=scope)
-        return token_response
+
+        if 'access_token' in token_response:
+            return token_response['access_token']
+        else:
+            mostrar_erro_personalizado(
+                "Falha ao obter token de acesso.",
+                "Verifique as credenciais e tente novamente."
+            )
+            st.stop()
+    except Exception as e:
+        mostrar_erro_personalizado(
+            f"Erro ao obter token de autenticação: {str(e)}",
+            "Verifique as configurações do certificado e do tenant."
+        )
+        st.stop()
     finally:
         os.remove(temp_cert_path)  # Remover arquivo temporário após uso
 
 # Obter e validar o token
-token_response = obter_token()
-if 'access_token' in token_response:
-    access_token = token_response['access_token']
-    headers = {
-        'Authorization': f'Bearer {access_token}',
-        'Accept': 'application/json;odata=verbose',
-        'Content-Type': 'application/json;odata=verbose'
-    }
-    st.success("Token de acesso obtido com sucesso!")
-else:
-    st.error("Erro ao obter token")
-    st.error(token_response)
-    st.stop()
+access_token = obter_token()
+headers = {
+    'Authorization': f'Bearer {access_token}',
+    'Accept': 'application/json;odata=verbose',
+    'Content-Type': 'application/json;odata=verbose'
+}
+st.success("Token de acesso obtido com sucesso!")
 
 # Upload do arquivo Excel
 uploaded_file = st.file_uploader("Escolha o arquivo Excel", type="xlsx")
 if uploaded_file:
-    df = pd.read_excel(uploaded_file)
-    st.write("Pré-visualização dos dados:", df.head())  # Mostra uma prévia dos dados
+    try:
+        df = pd.read_excel(uploaded_file)
+        st.write("Pré-visualização dos dados:", df.head())  # Mostra uma prévia dos dados
+    except Exception as e:
+        mostrar_erro_personalizado(
+            "Erro ao carregar o arquivo Excel.",
+            "Verifique se o arquivo está no formato correto e tente novamente."
+        )
 
     if st.button("Enviar para SharePoint"):
-        # Percorre o DataFrame
         for index, row in df.iterrows():
             try:
                 email = row['EMAIL']
@@ -175,7 +177,10 @@ if uploaded_file:
                 if response.status_code == 200:
                     correct_user_id = response.json()['d']['Id']
                 else:
-                    st.error(f"Erro ao garantir o usuário para o email {email}: {response.status_code}")
+                    mostrar_erro_personalizado(
+                        f"Erro ao buscar o usuário para o email {email}",
+                        "Certifique-se de que o email está correto e registrado no sistema."
+                    )
                     continue
 
                 # Dados do item a serem adicionados
@@ -199,6 +204,12 @@ if uploaded_file:
                 if response.status_code == 201:
                     st.success(f"Item adicionado com sucesso para {email}")
                 else:
-                    st.error(f"Erro ao adicionar item para {email}: {response.status_code}")
+                    mostrar_erro_personalizado(
+                        f"Erro ao adicionar item para {email}",
+                        f"Código de status: {response.status_code}. Verifique as configurações do SharePoint."
+                    )
             except Exception as e:
-                st.error(f"Erro ao processar linha {index}: {str(e)}")
+                mostrar_erro_personalizado(
+                    f"Erro ao processar linha {index}: {str(e)}",
+                    "Verifique o conteúdo e formato do arquivo."
+                )
