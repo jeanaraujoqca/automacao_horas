@@ -11,12 +11,12 @@ import base64
 
 # Configuração da página deve ser a primeira linha de Streamlit
 st.set_page_config(
-    page_title="Home",
+    page_title="Automação de Horas",
     page_icon='qca_logo_2.png',
     layout="wide",
 )
 
-def bg_page():
+def costumize_page():
     st.markdown(
         """
         <style>
@@ -35,14 +35,33 @@ def bg_page():
         header, .css-18e3th9, .css-1d391kg, [data-testid="stHeader"] {
             background-color: rgba(0, 0, 0, 0) !important;
             color: #ffffff; /* Texto branco para contraste */
+            }
+        
+        /* Cor dos títulos e subtítulos */
+        h1, h2, h3, h4, h5, h6 {
+            color: #8B0000 !important;
         }
+
+        p {
+            color: #8B0000 !important;
+        }
+
+        /* Cor da caixa de upload */
+        .stFileUploader {
+            background-color: #333333 !important;  /* Cor de fundo */
+            border: 2px solid #8B0000 !important;   /* Cor da borda vinho */
+            color: #ffffff !important;              /* Cor do texto dentro da caixa */
+            border-radius: 10px;                    /* Bordas arredondadas */
+            padding: 10px;
+        }
+        
         </style>
         """,
         unsafe_allow_html=True
     )
 
 # Aplicar o fundo da página
-bg_page()
+costumize_page()
 
 # Conteúdo da página
 st.title("Automação de Lançamento de Horas de Treinamento no SharePoint")
