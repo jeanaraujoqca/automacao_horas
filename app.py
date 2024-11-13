@@ -6,21 +6,64 @@ from datetime import datetime
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 import os
-import base64
-
-# Configurações do cliente (de preferência, carregue essas variáveis de ambiente)
-client_id = os.getenv('CLIENT_ID')
-client_secret = os.getenv('CLIENT_SECRET')
-tenant_id = os.getenv('TENANT_ID')
-cert_password = os.getenv('CERT_PASSWORD').encode()  # Converta a senha em bytes
-thumbprint = os.getenv('THUMBPRINT')
-
-certificado_base64 = os.getenv('CERT_BASE64')
-
-certificado_pem = base64.b64decode(certificado_base64)
+import tempfile
 
 # Inicialize Streamlit
 st.title("Upload e Envio de Dados para SharePoint")
+
+# Carregar as variáveis de ambiente
+client_id = os.getenv('CLIENT_ID')
+tenant_id = os.getenv('TENANT_ID')
+cert_password = os.getenv('CERT_PASSWORD', '').encode()  # Converta a senha em bytes
+thumbprint = os.getenv('THUMBPRINT')
+cert_content = os.getenv("CERTIFICADO_PEM")
+
+if not all([client_id, tenant_id, cert_password, thumbprint, cert_content]):
+    st.error("Erro: Verifique se todas as variáveis de ambiente estão configuradas.")
+    st.stop()
+
+# Criar arquivo temporário para o certificado
+with tempfile.NamedTemporaryFile(delete=False, suffix=".pem") as temp_cert_file:
+    temp_cert_file.write(cert_content.encode())
+    temp_cert_path = temp_cert_file.name  # Salva o caminho do arquivo temporário
+
+# Função para obter token de autenticação
+def obter_token():
+    try:
+        with open(temp_cert_path, 'rb') as pem_file:
+            private_key = serialization.load_pem_private_key(
+                pem_file.read(),
+                password=cert_password,
+                backend=default_backend()
+            )
+
+        # Configuração MSAL
+        authority = f'https://login.microsoftonline.com/{tenant_id}'
+        scope = ['https://queirozcavalcanti.sharepoint.com/.default']
+        app = msal.ConfidentialClientApplication(client_id, authority=authority,
+                                                 client_credential={
+                                                    "private_key": private_key,
+                                                    "thumbprint": thumbprint
+                                                 })
+        token_response = app.acquire_token_for_client(scopes=scope)
+        return token_response
+    finally:
+        os.remove(temp_cert_path)  # Remover arquivo temporário após uso
+
+# Obter e validar o token
+token_response = obter_token()
+if 'access_token' in token_response:
+    access_token = token_response['access_token']
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Accept': 'application/json;odata=verbose',
+        'Content-Type': 'application/json;odata=verbose'
+    }
+    st.success("Token de acesso obtido com sucesso!")
+else:
+    st.error("Erro ao obter token")
+    st.error(token_response)
+    st.stop()
 
 # Upload do arquivo Excel
 uploaded_file = st.file_uploader("Escolha o arquivo Excel", type="xlsx")
@@ -29,35 +72,6 @@ if uploaded_file:
     st.write("Pré-visualização dos dados:", df.head())  # Mostra uma prévia dos dados
 
     if st.button("Enviar para SharePoint"):
-        # Carregar chave privada do certificado
-        private_key = serialization.load_pem_private_key(
-        certificado_pem,
-        password=None, 
-        backend=default_backend()
-        )
-
-        # Obter token de autenticação
-        authority = f'https://login.microsoftonline.com/{tenant_id}'
-        scope = ['https://queirozcavalcanti.sharepoint.com/.default']
-        app = msal.ConfidentialClientApplication(client_id, authority=authority,
-                                                 client_credential={
-                                                    "private_key": private_key,
-                                                    "thumbprint": "D77E3395F9E653DC66A7DEAAC707B5D40615E3B0"
-                                                 })
-        token_response = app.acquire_token_for_client(scopes=scope)
-        
-        if 'access_token' in token_response:
-            access_token = token_response['access_token']
-            headers = {
-                'Authorization': f'Bearer {access_token}',
-                'Accept': 'application/json;odata=verbose',
-                'Content-Type': 'application/json;odata=verbose'
-            }
-            st.success("Token de acesso obtido com sucesso!")
-        else:
-            st.error("Erro ao obter token")
-            st.error(token_response)
-
         # Percorre o DataFrame
         for index, row in df.iterrows():
             try:
@@ -105,6 +119,3 @@ if uploaded_file:
                     st.error(f"Erro ao adicionar item para {email}: {response.status_code}")
             except Exception as e:
                 st.error(f"Erro ao processar linha {index}: {str(e)}")
-
-
-                
