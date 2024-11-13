@@ -8,24 +8,35 @@ from cryptography.hazmat.backends import default_backend
 import os
 import tempfile
 import base64
+from utils import bg_page
 
-url_background = "https://raw.githubusercontent.com/jeanaraujoqca/automacao_horas/refs/heads/main/bg_dark.png"
-
-# Definir o estilo CSS para a imagem de fundo
-page_bg_img = f'''
+st.set_page_config(
+    page_title="Home",
+    page_icon='qca_logo_2.png',
+    layout="wide",
+)
+bg_page('bg_dark.png')
+hide_menu = """
 <style>
-html, body, .stApp {{
-background-image: url("{url_background}");
-background-size: cover;
-background-repeat: no-repeat;
-background-attachment: fixed;
-}}
+#MainMenu {
+    visibility:visible;
+}
+
+footer {
+    visibility:visible;
+}
+
+footer:before {
+    content:'Desenvolvido pelo Núcleo de Operações - Controladoria Jurídica';
+    display:block;
+    position:relative;
+    color:#6c6a76;
+}
 </style>
-'''
+"""
 
 # Inicialize Streamlit
-st.markdown(page_bg_img, unsafe_allow_html=True)
-st.title("Upload e Envio de Dados para SharePoint")
+st.title("Automação de Lançamento de Horas de Treinamento no SharePoint")
 
 # Carregar as variáveis de ambiente
 client_id = os.getenv('CLIENT_ID')
