@@ -56,6 +56,7 @@ if uploaded_file:
             st.success("Token de acesso obtido com sucesso!")
         else:
             st.error("Erro ao obter token")
+            print(token_response)
 
         # Percorre o DataFrame
         for index, row in df.iterrows():
