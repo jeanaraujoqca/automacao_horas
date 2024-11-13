@@ -38,18 +38,19 @@ def costumize_page():
             }
         
         /* Cor dos títulos e subtítulos */
-        h1, h2, h3, h4, h5, h6 {
-            color: #8B0000 !important;
+        h1 {
+            color: #A10D22 !important;
+            font-size: 38px;
         }
 
-        p {
-            color: #8B0000 !important;
+        p:has-text("Escolha o arquivo Excel") {
+            color: #A10D22 !important;
         }
 
         /* Cor da caixa de upload */
         .stFileUploader {
-            background-color: #333333 !important;  /* Cor de fundo */
-            border: 2px solid #8B0000 !important;   /* Cor da borda vinho */
+            background-color: #1B263B !important;  /* Cor de fundo */
+            border: 2px solid #A10D22 !important;   /* Cor da borda vinho */
             color: #ffffff !important;              /* Cor do texto dentro da caixa */
             border-radius: 10px;                    /* Bordas arredondadas */
             padding: 10px;
