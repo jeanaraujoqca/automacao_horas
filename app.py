@@ -15,7 +15,7 @@ st.set_page_config(
     page_icon='qca_logo_2.png',
     layout="wide",
 )
-bg_page('bg_dark.png')
+bg_page()
 hide_menu = """
 <style>
 #MainMenu {
