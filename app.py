@@ -11,7 +11,7 @@ import base64
 
 # Configuração da página deve ser a primeira linha de Streamlit
 st.set_page_config(
-    page_title="Automação de Horas",
+    page_title="Home",
     page_icon='qca_logo_2.png',
     layout="wide",
 )
@@ -20,38 +20,29 @@ def bg_page():
     st.markdown(
         """
         <style>
-        /* Aplica o fundo ao HTML e BODY para cobrir toda a página */
-        .stApp {
+        /* Aplica o fundo ao HTML, BODY e elementos principais */
+        html, body, .stApp {
             background-image: url("https://raw.githubusercontent.com/jeanaraujoqca/automacao_horas/refs/heads/main/bg_dark.png");
             background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Transparência para cabeçalho e barra lateral */
+        [data-testid="stSidebar"], .css-18e3th9, .css-1d391kg {
+            background-color: rgba(0, 0, 0, 0) !important;
+            color: #ffffff; /* Ajuste para garantir legibilidade */
         }
         </style>
         """,
         unsafe_allow_html=True
     )
 
-hide_menu = """
-<style>
-#MainMenu {
-    visibility:visible;
-}
-
-footer {
-    visibility:visible;
-}
-
-footer:before {
-    content:'Desenvolvido pela Eficiência Jurídica - Controladoria Jurídica';
-    display:block;
-    position:relative;
-    color:#6c6a76;
-}
-</style>
-"""
-
 # Aplicar o fundo da página
 bg_page()
-st.markdown(hide_menu, unsafe_allow_html=True)
 
 # Conteúdo da página
 st.title("Automação de Lançamento de Horas de Treinamento no SharePoint")
