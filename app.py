@@ -8,6 +8,13 @@ from cryptography.hazmat.backends import default_backend
 import os
 import tempfile
 
+# Configuração da página deve ser a primeira linha de Streamlit
+st.set_page_config(
+    page_title="Home",
+    page_icon='qca_logo_2.png',
+    layout="wide",
+)
+
 def bg_page():
     st.markdown(
         """
@@ -23,15 +30,8 @@ def bg_page():
         unsafe_allow_html=True
     )
 
-# Chama a função para aplicar o fundo
+# Aplicar o fundo da página
 bg_page()
-
-# Configuração da página e conteúdo
-st.set_page_config(
-    page_title="Home",
-    page_icon='qca_logo_2.png',
-    layout="wide",
-)
 
 # Conteúdo da página
 st.title("Automação de Lançamento de Horas de Treinamento no SharePoint")
