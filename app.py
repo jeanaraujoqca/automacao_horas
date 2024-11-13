@@ -1,6 +1,6 @@
 import streamlit as st
 import msal
-import requests 
+import requests
 import pandas as pd
 from datetime import datetime
 from cryptography.hazmat.primitives import serialization
@@ -8,6 +8,7 @@ from cryptography.hazmat.backends import default_backend
 import os
 import tempfile
 import base64
+from io import BytesIO
 
 # Configuração da página deve ser a primeira linha de Streamlit
 st.set_page_config(
@@ -62,79 +63,37 @@ customize_page()
 # Título da página
 st.title("Automação de Lançamento de Horas de Treinamento no SharePoint")
 
-# Função para exibir mensagens de erro amigáveis
-def mostrar_erro_personalizado(mensagem, sugestao=None):
-    st.error(f"🚨 {mensagem}")
-    if sugestao:
-        st.info(f"💡 {sugestao}")
-
 # Carregar as variáveis de ambiente
-variaveis = {
-    "CLIENT_ID": os.getenv('CLIENT_ID'),
-    "TENANT_ID": os.getenv('TENANT_ID'),
-    "CERT_PASSWORD": os.getenv('CERT_PASSWORD', '').encode(),  # Converta a senha em bytes
-    "THUMBPRINT": os.getenv('THUMBPRINT'),
-    "CERTIFICADO_BASE64": os.getenv("CERTIFICADO_BASE64")
-}
+client_id = os.getenv('CLIENT_ID')
+tenant_id = os.getenv('TENANT_ID')
+cert_password = os.getenv('CERT_PASSWORD', '').encode()
+thumbprint = os.getenv('THUMBPRINT')
+cert_base64 = os.getenv("CERTIFICADO_BASE64")
 
-# Verifique se há variáveis de ambiente ausentes e exiba um erro para cada uma
-missing_vars = [var for var, value in variaveis.items() if not value]
-
-if missing_vars:
-    mostrar_erro_personalizado(
-        "Algumas variáveis de ambiente estão ausentes e são necessárias para a execução.",
-        "Verifique as configurações e certifique-se de que todas as variáveis de ambiente estão corretamente configuradas."
-    )
-    for var in missing_vars:
-        st.write(f"- **{var}** está ausente")
-    st.stop()  # Interrompe a execução se houver variáveis de ambiente ausentes
-
-cert_pem = base64.b64decode(variaveis["CERTIFICADO_BASE64"])
-
-# Salve o certificado temporariamente
-with tempfile.NamedTemporaryFile(delete=False, suffix=".pem") as temp_cert_file:
-    temp_cert_file.write(cert_pem)
-    temp_cert_path = temp_cert_file.name
-
-# Função para obter token de autenticação com tratamento de erro
+# Função para obter token de autenticação
 def obter_token():
     try:
-        # Carregue a chave privada do certificado temporário
-        with open(temp_cert_path, 'rb') as pem_file:
-            private_key = serialization.load_pem_private_key(
-                pem_file.read(),
-                password=None,  # Coloque a senha se o PEM estiver protegido
-                backend=default_backend()
-            )
-
-        # Configuração MSAL
-        authority = f'https://login.microsoftonline.com/{variaveis["TENANT_ID"]}'
+        authority = f'https://login.microsoftonline.com/{tenant_id}'
         scope = ['https://queirozcavalcanti.sharepoint.com/.default']
         app = msal.ConfidentialClientApplication(
-            variaveis["CLIENT_ID"], authority=authority,
+            client_id, authority=authority,
             client_credential={
-                "private_key": private_key,
-                "thumbprint": variaveis["THUMBPRINT"]
+                "private_key": serialization.load_pem_private_key(
+                    base64.b64decode(cert_base64), 
+                    password=None, 
+                    backend=default_backend()
+                ),
+                "thumbprint": thumbprint
             }
         )
         token_response = app.acquire_token_for_client(scopes=scope)
-
         if 'access_token' in token_response:
             return token_response['access_token']
         else:
-            mostrar_erro_personalizado(
-                "Falha ao obter token de acesso.",
-                "Verifique as credenciais e tente novamente."
-            )
-            st.stop()
+            raise ValueError("Erro ao obter token de acesso.")
     except Exception as e:
-        mostrar_erro_personalizado(
-            f"Erro ao obter token de autenticação: {str(e)}",
-            "Verifique as configurações do certificado e do tenant."
-        )
+        st.error(f"Erro ao obter token de autenticação: {str(e)}")
         st.stop()
-    finally:
-        os.remove(temp_cert_path)  # Remover arquivo temporário após uso
 
 # Obter e validar o token
 access_token = obter_token()
@@ -143,21 +102,19 @@ headers = {
     'Accept': 'application/json;odata=verbose',
     'Content-Type': 'application/json;odata=verbose'
 }
-st.success("Token de acesso obtido com sucesso!")
 
 # Upload do arquivo Excel
 uploaded_file = st.file_uploader("Escolha o arquivo Excel", type="xlsx")
 if uploaded_file:
-    try:
-        df = pd.read_excel(uploaded_file)
-        st.write("Pré-visualização dos dados:", df.head())  # Mostra uma prévia dos dados
-    except Exception as e:
-        mostrar_erro_personalizado(
-            "Erro ao carregar o arquivo Excel.",
-            "Verifique se o arquivo está no formato correto e tente novamente."
-        )
+    df = pd.read_excel(uploaded_file)
+    st.write("Pré-visualização dos dados:", df.head())
 
     if st.button("Enviar para SharePoint"):
+        st.write("Aguarde, estamos lançando os treinamentos...")
+
+        # Lista para armazenar o status de cada treinamento
+        resultados = []
+
         for index, row in df.iterrows():
             try:
                 email = row['EMAIL']
@@ -177,11 +134,7 @@ if uploaded_file:
                 if response.status_code == 200:
                     correct_user_id = response.json()['d']['Id']
                 else:
-                    mostrar_erro_personalizado(
-                        f"Erro ao buscar o usuário para o email {email}",
-                        "Certifique-se de que o email está correto e registrado no sistema."
-                    )
-                    continue
+                    raise ValueError(f"Erro ao buscar o usuário para o email {email}: {response.status_code}")
 
                 # Dados do item a serem adicionados
                 item_data = {
@@ -202,14 +155,42 @@ if uploaded_file:
                 response = requests.post(add_item_url, headers=headers, json=item_data)
 
                 if response.status_code == 201:
-                    st.success(f"Item adicionado com sucesso para {email}")
+                    resultados.append({
+                        "Email": email,
+                        "Treinamento": treinamento,
+                        "Status": "Sucesso",
+                        "Mensagem": "Item adicionado com sucesso"
+                    })
                 else:
-                    mostrar_erro_personalizado(
-                        f"Erro ao adicionar item para {email}",
-                        f"Código de status: {response.status_code}. Verifique as configurações do SharePoint."
-                    )
+                    resultados.append({
+                        "Email": email,
+                        "Treinamento": treinamento,
+                        "Status": "Erro",
+                        "Mensagem": f"Erro ao adicionar item: {response.status_code}"
+                    })
             except Exception as e:
-                mostrar_erro_personalizado(
-                    f"Erro ao processar para {email}: {str(e)}",
-                    "Verifique o conteúdo e formato do arquivo."
-                )
+                resultados.append({
+                    "Email": email,
+                    "Treinamento": treinamento,
+                    "Status": "Erro",
+                    "Mensagem": str(e)
+                })
+
+        # Gerar o relatório em um DataFrame
+        df_resultados = pd.DataFrame(resultados)
+
+        # Salvar o relatório como um arquivo Excel em memória
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df_resultados.to_excel(writer, index=False, sheet_name='Resultados')
+            writer.save()
+        output.seek(0)
+
+        # Exibir botão para download do relatório
+        st.success("Processamento concluído! Baixe o relatório abaixo.")
+        st.download_button(
+            label="Baixar Relatório de Resultados",
+            data=output,
+            file_name="relatorio_resultados.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
