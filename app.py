@@ -151,7 +151,6 @@ def enviar_email(relatorio, nome, equipe, total_sucesso, total_erro):
 nome = st.text_input("Nome")
 equipe = st.text_input("Equipe")
 email_usuario = st.text_input("E-mail Corporativo")
-st.write(f"E-mail capturado: {email_usuario}")
 
 # Obter e validar o token
 access_token = obter_token()
@@ -167,9 +166,7 @@ if uploaded_file and nome and equipe:
     df = pd.read_excel(uploaded_file)
     st.write("Pré-visualização dos dados:", df.head())
 
-    # obter author_id
-
-    obter_author_id(email_usuario, headers)
+    st.write(f"E-mail capturado: {email_usuario}")
 
     # Verificar colunas necessárias
     required_columns = ['EMAIL', 'UNIDADE', 'TREINAMENTO', 'CARGA HORARIA', 'TIPO DO TREINAMENTO', 'INICIO DO TREINAMENTO', 'TERMINO DO TREINAMENTO', 'CATEGORIA', 'INSTITUIÇÃO/INSTRUTOR']
@@ -180,6 +177,8 @@ if uploaded_file and nome and equipe:
         st.stop()
 
     if st.button("Enviar para SharePoint"):
+        # obter author_id
+        obter_author_id(email_usuario, headers)
         st.write("Aguarde, estamos lançando os treinamentos...")
 
         # Lista para armazenar o status de cada treinamento
