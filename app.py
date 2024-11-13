@@ -15,7 +15,7 @@ url_background = "https://raw.githubusercontent.com/jeanaraujoqca/automacao_hora
 page_bg_img = f'''
 <style>
 .stApp {{
-background-image: url("{url_da_imagem}");
+background-image: url("{url_background}");
 background-size: cover;
 background-repeat: no-repeat;
 background-attachment: fixed;
