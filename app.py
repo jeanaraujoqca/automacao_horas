@@ -20,21 +20,21 @@ def bg_page():
     st.markdown(
         """
         <style>
-        /* Aplica o fundo ao HTML, BODY e elementos principais */
+        /* Força o fundo a cobrir toda a área da página */
         html, body, .stApp {
             background-image: url("https://raw.githubusercontent.com/jeanaraujoqca/automacao_horas/refs/heads/main/bg_dark.png");
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            height: 100%;
+            height: 100vh;
             margin: 0;
             padding: 0;
         }
 
-        /* Transparência para cabeçalho e barra lateral */
-        [data-testid="stSidebar"], .css-18e3th9, .css-1d391kg {
+        /* Adiciona transparência ao cabeçalho e remove a borda */
+        header, .css-18e3th9, .css-1d391kg, [data-testid="stHeader"] {
             background-color: rgba(0, 0, 0, 0) !important;
-            color: #ffffff; /* Ajuste para garantir legibilidade */
+            color: #ffffff; /* Texto branco para contraste */
         }
         </style>
         """,
