@@ -38,7 +38,7 @@ def costumize_page():
         }
 
         /* Estilo dos títulos e subtítulos em branco */
-        h1, h2, h3, h4, h5, h6, p, label {
+        h1, h2, h3, h4, h5, h6, label {
             color: #ffffff !important;  /* Texto em branco */
         }
 
