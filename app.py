@@ -129,19 +129,14 @@ def enviar_email(relatorio, nome, equipe, total_sucesso, total_erro):
     mensagem.attach(part)
 
     # Envio do e-mail
-    try:
-        with smtplib.SMTP("smtp-mail.outlook.com", 587) as servidor:
-            servidor.starttls()
-            servidor.login(remetente, senha)
-            servidor.sendmail(remetente, destinatario, mensagem.as_string())
-        st.success("E-mail enviado com sucesso!")
-    except Exception as e:
-        st.error(f"Erro ao enviar o e-mail: {str(e)}")
+    with smtplib.SMTP("smtp-mail.outlook.com", 587) as servidor:
+        servidor.starttls()
+        servidor.login(remetente, senha)
+        servidor.sendmail(remetente, destinatario, mensagem.as_string())
 
 # Campos de entrada para nome e equipe
 nome = st.text_input("Nome")
 equipe = st.text_input("Equipe")
-email_usuario = st.text_input("E-mail Corporativo")
 
 # Obter e validar o token
 access_token = obter_token()
@@ -157,8 +152,6 @@ if uploaded_file and nome and equipe:
     df = pd.read_excel(uploaded_file)
     st.write("Pré-visualização dos dados:", df.head())
 
-    st.write(f"E-mail capturado: {email_usuario}")
-
     # Verificar colunas necessárias
     required_columns = ['EMAIL', 'UNIDADE', 'TREINAMENTO', 'CARGA HORARIA', 'TIPO DO TREINAMENTO', 'INICIO DO TREINAMENTO', 'TERMINO DO TREINAMENTO', 'CATEGORIA', 'INSTITUIÇÃO/INSTRUTOR']
     missing_columns = [col for col in required_columns if col not in df.columns]
@@ -168,15 +161,6 @@ if uploaded_file and nome and equipe:
         st.stop()
 
     if st.button("Enviar para SharePoint"):
-        # Obter Id do Autor 
-        user_url = f"https://queirozcavalcanti.sharepoint.com/sites/qca360/_api/web/siteusers/getbyemail('{email_usuario}')"
-        response = requests.get(user_url, headers=headers)
-        
-        if response.status_code == 200:
-            author_id = response.json()['d']['Id']
-        else:
-            raise ValueError(f"Erro ao buscar o usuário para o email {email_usuario}: {response.status_code}")
-        
         st.write("Aguarde, estamos lançando os treinamentos...")
 
         # Lista para armazenar o status de cada treinamento
@@ -218,7 +202,6 @@ if uploaded_file and nome and equipe:
                     "INSTITUI_x00c7__x00c3_O_x002f_IN": instituicao_instrutor,
                     "UNIDADE": unidade,
                     "E_x002d_MAILId": correct_user_id,
-                    "AuthorId": author_id
                 }
 
                 add_item_url = f"https://queirozcavalcanti.sharepoint.com/sites/qca360/_api/web/lists/getbytitle('Treinamento de atividades')/items"
