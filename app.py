@@ -144,6 +144,14 @@ def enviar_email(relatorio, nome, equipe, total_sucesso, total_erro):
         servidor.login(remetente, senha)
         servidor.sendmail(remetente, destinatarios, mensagem.as_string())
 
+def formatar_data(data):
+    if isinstance(data, pd.Timestamp) or isinstance(data, datetime):
+        # Se for Timestamp ou datetime, aplica strftime diretamente
+        return data.strftime("%Y-%m-%dT%H:%M:%S")
+    else:
+        # Caso contrário, converte primeiro para datetime com strptime
+        return datetime.strptime(data, "%d/%m/%Y").strftime("%Y-%m-%dT%H:%M:%S")
+
 # Campos de entrada para nome e equipe
 nome = st.text_input("Nome:")
 equipe = st.text_input("Equipe:")
@@ -186,8 +194,8 @@ if uploaded_file and nome and equipe:
                     treinamento = row['TREINAMENTO']
                     carga_horaria = str(row['CARGA HORARIA'])
                     tipo_treinamento = row['TIPO DO TREINAMENTO']
-                    inicio_convertido = datetime.strptime(row['INICIO DO TREINAMENTO'], "%d/%m/%Y").strftime("%Y-%m-%dT%H:%M:%S")
-                    termino_convertido = datetime.strptime(row['TERMINO DO TREINAMENTO'], "%d/%m/%Y").strftime("%Y-%m-%dT%H:%M:%S")
+                    inicio_convertido = formatar_data(row['INICIO DO TREINAMENTO'])
+                    termino_convertido = formatar_data(row['TERMINO DO TREINAMENTO'])
                     categoria = row['CATEGORIA']
                     instituicao_instrutor = row['INSTITUIÇÃO/INSTRUTOR']
                     
