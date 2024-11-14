@@ -109,7 +109,7 @@ def obter_token():
 # Função para enviar e-mail
 def enviar_email(relatorio, nome, equipe, total_sucesso, total_erro):
     remetente = email_jean  # Substitua pelo seu e-mail
-    destinatario = [email_dani, email_jean, email_tanus]  # Substitua pelo e-mail destinatário
+    destinatarios = [email_dani, email_jean, email_tanus]  # Substitua pelo e-mail destinatário
     senha = senha_email  # Substitua pela senha do e-mail
 
     # Configuração do e-mail
