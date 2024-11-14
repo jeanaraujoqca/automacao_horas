@@ -48,7 +48,7 @@ def customize_page():
         }
 
         p {
-            color: #A22330;
+            color: #FF0000;
             font-weight: bold;
             font-size: 14px;
         }
