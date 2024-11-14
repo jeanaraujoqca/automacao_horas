@@ -44,7 +44,7 @@ def customize_page():
         /* Estilo dos títulos e subtítulos em branco */
         h1 {
             color: #ffffff !important;
-            font-size: 28px;
+            font-size: 32px;
         }
 
         p {
