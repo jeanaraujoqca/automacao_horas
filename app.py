@@ -142,7 +142,7 @@ def enviar_email(relatorio, nome, equipe, total_sucesso, total_erro):
     with smtplib.SMTP("smtp-mail.outlook.com", 587) as servidor:
         servidor.starttls()
         servidor.login(remetente, senha)
-        servidor.sendmail(remetente, destinatario, mensagem.as_string())
+        servidor.sendmail(remetente, destinatarios, mensagem.as_string())
 
 # Campos de entrada para nome e equipe
 nome = st.text_input("Nome:")
