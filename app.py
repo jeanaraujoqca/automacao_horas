@@ -72,6 +72,7 @@ cert_base64 = os.getenv("CERTIFICADO_BASE64")
 email_jean = os.getenv("EMAIL_JEAN")
 email_dani = os.getenv("EMAIL_DANI")
 senha_email = os.getenv("SENHA_EMAIL")
+email_tanus = os.getenv("EMAIL_TANUS")
 
 # Função para obter token de autenticação
 def obter_token():
@@ -101,7 +102,7 @@ def obter_token():
 # Função para enviar e-mail
 def enviar_email(relatorio, nome, equipe, total_sucesso, total_erro):
     remetente = email_jean  # Substitua pelo seu e-mail
-    destinatario = email_dani  # Substitua pelo e-mail destinatário
+    destinatario = email_dani, email_jean, email_tanus  # Substitua pelo e-mail destinatário
     senha = senha_email  # Substitua pela senha do e-mail
 
     # Configuração do e-mail
