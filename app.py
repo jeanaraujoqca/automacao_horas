@@ -46,6 +46,11 @@ def customize_page():
             color: #ffffff !important;
             font-size: 28px;
         }
+
+        p {
+            color: #A22330;
+        }
+        
         /* Caixa de upload de arquivo em branco */
         .stFileUploader {
             background-color: #ffffff !important;
