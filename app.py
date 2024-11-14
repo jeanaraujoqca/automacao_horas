@@ -145,8 +145,8 @@ def enviar_email(relatorio, nome, equipe, total_sucesso, total_erro):
         servidor.sendmail(remetente, destinatario, mensagem.as_string())
 
 # Campos de entrada para nome e equipe
-nome = st.text_input("Nome")
-equipe = st.text_input("Equipe")
+nome = st.text_input("Nome:")
+equipe = st.text_input("Equipe:")
 
 # Obter e validar o token
 access_token = obter_token()
@@ -157,7 +157,7 @@ headers = {
 }
 
 # Upload do arquivo Excel
-uploaded_file = st.file_uploader("Escolha o arquivo Excel", type="xlsx")
+uploaded_file = st.file_uploader("Escolha o arquivo Excel:", type="xlsx")
 if uploaded_file and nome and equipe:
     df = pd.read_excel(uploaded_file)
     st.write("Pré-visualização dos dados:", df.head())
