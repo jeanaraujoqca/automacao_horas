@@ -171,61 +171,64 @@ if uploaded_file and nome and equipe:
         st.stop()
 
     if st.button("Enviar para SharePoint"):
-        st.write("Aguarde, estamos lançando os treinamentos...")
-
-        # Lista para armazenar o status de cada treinamento
-        resultados = []
-        total_sucesso = 0
-        total_erro = 0
-
-        for index, row in df.iterrows():
-            try:
-                email = row['EMAIL']
-                unidade = row['UNIDADE']
-                treinamento = row['TREINAMENTO']
-                carga_horaria = str(row['CARGA HORARIA'])
-                tipo_treinamento = row['TIPO DO TREINAMENTO']
-                inicio_convertido = datetime.strptime(row['INICIO DO TREINAMENTO'], "%d/%m/%Y").strftime("%Y-%m-%dT%H:%M:%S")
-                termino_convertido = datetime.strptime(row['TERMINO DO TREINAMENTO'], "%d/%m/%Y").strftime("%Y-%m-%dT%H:%M:%S")
-                categoria = row['CATEGORIA']
-                instituicao_instrutor = row['INSTITUIÇÃO/INSTRUTOR']
-                
-                # Obter ID do usuário no SharePoint
-                user_url = f"https://queirozcavalcanti.sharepoint.com/sites/qca360/_api/web/siteusers/getbyemail('{email}')"
-                response = requests.get(user_url, headers=headers)
-                
-                if response.status_code == 200:
-                    correct_user_id = response.json()['d']['Id']
-                else:
-                    raise ValueError(f"Erro ao buscar o usuário para o email {email}: {response.status_code}")
-
-                # Dados do item a serem adicionados
-                item_data = {
-                    "__metadata": {"type": "SP.Data.Treinamentos_x005f_qcaListItem"},
-                    "NOMEDOINTEGRANTEId": correct_user_id,
-                    "Title": treinamento,
-                    "CARGAHORARIA": carga_horaria,
-                    "TIPO_x0020_DO_x0020_TREINAMENTO_": tipo_treinamento,
-                    "INICIO_x0020_DO_x0020_TREINAMENT": inicio_convertido,
-                    "TERMINO_x0020_DO_x0020_TREINAMEN": termino_convertido,
-                    "TIPO_": categoria,
-                    "INSTITUI_x00c7__x00c3_O_x002f_IN": instituicao_instrutor,
-                    "UNIDADE": unidade,
-                    "E_x002d_MAILId": correct_user_id,
-                }
-
-                add_item_url = f"https://queirozcavalcanti.sharepoint.com/sites/qca360/_api/web/lists/getbytitle('Treinamento de atividades')/items"
-                response = requests.post(add_item_url, headers=headers, json=item_data)
-
-                if response.status_code == 201:
-                    resultados.append({"Email": email, "Treinamento": treinamento, "Status": "Sucesso", "Mensagem": "Item adicionado com sucesso"})
-                    total_sucesso += 1
-                else:
-                    resultados.append({"Email": email, "Treinamento": treinamento, "Status": "Erro", "Mensagem": f"Erro ao adicionar item: {response.status_code}"})
+        if nome and equipe:
+            st.write("Aguarde, estamos lançando os treinamentos...")
+    
+            # Lista para armazenar o status de cada treinamento
+            resultados = []
+            total_sucesso = 0
+            total_erro = 0
+    
+            for index, row in df.iterrows():
+                try:
+                    email = row['EMAIL']
+                    unidade = row['UNIDADE']
+                    treinamento = row['TREINAMENTO']
+                    carga_horaria = str(row['CARGA HORARIA'])
+                    tipo_treinamento = row['TIPO DO TREINAMENTO']
+                    inicio_convertido = datetime.strptime(row['INICIO DO TREINAMENTO'], "%d/%m/%Y").strftime("%Y-%m-%dT%H:%M:%S")
+                    termino_convertido = datetime.strptime(row['TERMINO DO TREINAMENTO'], "%d/%m/%Y").strftime("%Y-%m-%dT%H:%M:%S")
+                    categoria = row['CATEGORIA']
+                    instituicao_instrutor = row['INSTITUIÇÃO/INSTRUTOR']
+                    
+                    # Obter ID do usuário no SharePoint
+                    user_url = f"https://queirozcavalcanti.sharepoint.com/sites/qca360/_api/web/siteusers/getbyemail('{email}')"
+                    response = requests.get(user_url, headers=headers)
+                    
+                    if response.status_code == 200:
+                        correct_user_id = response.json()['d']['Id']
+                    else:
+                        raise ValueError(f"Erro ao buscar o usuário para o email {email}: {response.status_code}")
+    
+                    # Dados do item a serem adicionados
+                    item_data = {
+                        "__metadata": {"type": "SP.Data.Treinamentos_x005f_qcaListItem"},
+                        "NOMEDOINTEGRANTEId": correct_user_id,
+                        "Title": treinamento,
+                        "CARGAHORARIA": carga_horaria,
+                        "TIPO_x0020_DO_x0020_TREINAMENTO_": tipo_treinamento,
+                        "INICIO_x0020_DO_x0020_TREINAMENT": inicio_convertido,
+                        "TERMINO_x0020_DO_x0020_TREINAMEN": termino_convertido,
+                        "TIPO_": categoria,
+                        "INSTITUI_x00c7__x00c3_O_x002f_IN": instituicao_instrutor,
+                        "UNIDADE": unidade,
+                        "E_x002d_MAILId": correct_user_id,
+                    }
+    
+                    add_item_url = f"https://queirozcavalcanti.sharepoint.com/sites/qca360/_api/web/lists/getbytitle('Treinamento de atividades')/items"
+                    response = requests.post(add_item_url, headers=headers, json=item_data)
+    
+                    if response.status_code == 201:
+                        resultados.append({"Email": email, "Treinamento": treinamento, "Status": "Sucesso", "Mensagem": "Item adicionado com sucesso"})
+                        total_sucesso += 1
+                    else:
+                        resultados.append({"Email": email, "Treinamento": treinamento, "Status": "Erro", "Mensagem": f"Erro ao adicionar item: {response.status_code}"})
+                        total_erro += 1
+                except Exception as e:
+                    resultados.append({"Email": email, "Treinamento": treinamento, "Status": "Erro", "Mensagem": str(e)})
                     total_erro += 1
-            except Exception as e:
-                resultados.append({"Email": email, "Treinamento": treinamento, "Status": "Erro", "Mensagem": str(e)})
-                total_erro += 1
+        else:
+            st.error("Preencha os campos de nome e equipe.")
 
         # Gerar o relatório em um DataFrame
         df_resultados = pd.DataFrame(resultados)
