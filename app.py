@@ -109,13 +109,13 @@ def obter_token():
 # Função para enviar e-mail
 def enviar_email(relatorio, nome, equipe, total_sucesso, total_erro):
     remetente = email_jean  # Substitua pelo seu e-mail
-    destinatario = email_dani, email_jean, email_tanus  # Substitua pelo e-mail destinatário
+    destinatario = [email_dani, email_jean, email_tanus]  # Substitua pelo e-mail destinatário
     senha = senha_email  # Substitua pela senha do e-mail
 
     # Configuração do e-mail
     mensagem = MIMEMultipart()
     mensagem["From"] = remetente
-    mensagem["To"] = destinatario
+    mensagem["To"] = ", ".join(destinatarios)
     mensagem["Subject"] = "Relatório de Utilização - Automação de Horas"
 
     # Corpo do e-mail
