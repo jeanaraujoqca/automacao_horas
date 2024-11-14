@@ -49,6 +49,8 @@ def customize_page():
 
         p {
             color: #A22330;
+            font-weight: bold;
+            font-size: 14px;
         }
         
         /* Caixa de upload de arquivo em branco */
