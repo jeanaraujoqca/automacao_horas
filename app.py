@@ -76,7 +76,7 @@ tenant_id = os.getenv('TENANT_ID')
 cert_password = os.getenv('CERT_PASSWORD', '').encode()
 thumbprint = os.getenv('THUMBPRINT')
 cert_base64 = os.getenv("CERTIFICADO_BASE64")
-email_jean = os.getenv("EMAIL_JEAN")
+# email_jean = os.getenv("EMAIL_JEAN")
 email_dani = os.getenv("EMAIL_DANI")
 senha_email = os.getenv("SENHA_EMAIL")
 email_tanus = os.getenv("EMAIL_TANUS")
@@ -108,8 +108,8 @@ def obter_token():
 
 # Função para enviar e-mail
 def enviar_email(relatorio, nome, equipe, total_sucesso, total_erro):
-    remetente = email_jean  # Substitua pelo seu e-mail
-    destinatarios = [email_dani, email_jean, email_tanus]  # Substitua pelo e-mail destinatário
+    remetente = email_tanus  # Substitua pelo seu e-mail
+    destinatarios = [email_dani, email_tanus]  # Substitua pelo e-mail destinatário
     senha = senha_email  # Substitua pela senha do e-mail
 
     # Configuração do e-mail
